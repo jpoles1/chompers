@@ -1,6 +1,7 @@
 //Start by creating a population of organisms, each with two chromosomes encoding selection instructions.
 var popsize = 100;
-var worldsize=800;
+var worldsizex=window.screen.availWidth-200;
+var worldsizey=window.screen.availHeight-200;
 var initmaxmove = 100;
 var pop = [];
 var sprite = [];
@@ -28,24 +29,24 @@ function randColor() {
 }
 function Chomper(genomesize) {
     this.genomesize = genomesize;
-    this.x = randNum(worldsize);
-    this.y = randNum(worldsize);
+    this.size = 4;
+    this.x = randNum(worldsizex-this.size);
+    this.y = randNum(worldsizey-this.size);
     this.color = randColor();
     this.step = 0;
-    this.size = 6;
     this.food = 10000;
-    g.beginFill(pop[i].color, 1);
-    this.geom = g.drawRect(this.x, this.y, this.size, this.size);
+    this.geom = paper.rect(this.x, this.y, this.size, this.size);
     var genome = "";
     for(var base=0; base<genomesize; base++){
         genome = genome + randSel(["u", "d", "l", "r"]);
         genome = genome + String(randNum(initmaxmove));
         this.genome = genome;
     }
-    this.step = function(){
+    this.stepani = function(){
         var letter = genome[this.step];
         var dist = genome[this.step+1];
         if(this.food-this.dist<=0){
+            console.log("Dead")
             return 0;
         }
         else{
@@ -63,53 +64,54 @@ function Chomper(genomesize) {
             }
             if(this.y<0){this.y=0}
             if(this.x<0){this.x=0}
-            if(this.x+this.size>worldsize){
-                this.x = worldsize-this.size
+            if(this.x+this.size>worldsizex){
+                this.x = worldsizex-this.size
             }
-            if(this.y+this.size>worldsize){
-                this.y = worldsize-this.size
+            if(this.y+this.size>worldsizey){
+                this.y = worldsizey-this.size
             }
-            this.step+=2
+            this.step+=2;
+            this.geom.animate({x: this.x, y: this.y}, this.dist*5);
             return 1;
         }
     }
-    this.step();
     this.id = id;
     id++;
 }
+var paper;
+var delay = 500;
+var duration = 0;
+window.onload = function(){
+    paper = Raphael(10, 50, worldsizex, worldsizey);
+    create();
+    window.setInterval(update, delay);
+};
 //Game Functions
 // create an new instance of a pixi stage
 //var stage = new PIXI.Stage(0xFFFFFF);
-var paper = Raphael(10, 50, worldsize, worldsize);
 // create a renderer instance.
 //var renderer = PIXI.autoDetectRenderer(worldsize, worldsize, document.getElementById('game'));
 
 // add the renderer view element to the DOM
-requestAnimFrame(update);
-var g = new PIXI.Graphics();
 function create(){
     createPop();
     for(i=0; i<pop.length; i++){
-        var x = pop[i].x;
-        var y = pop[i].y;
-        var size = pop[i].size;
+        pop[i].geom.attr("fill", "#f00")
     }
 }
 function update(){
-    console.log("TEST");
     for(i=0; i<pop.length; i++){
         if(pop[i]){
-            var step = pop[i].step;
+            var step = pop[i].stepani();
             if(step==1){
-                console.log(pop[i].id)
-                //sprite[i].position.x = pop[i].x;
-                //sprite[i].position.y = pop[i].y;
-                sprite[i].moveTo(pop[i].x, pop[i].y)
+                pop[i].geom.attr("fill", "#f00")
             }
             else{
+                console.log("Number "+String(i)+" has died");
                 delete pop[i]
-                delete sprite[i]
             }
         }
     }
+    duration+=1;
+    console.log(duration);
 }
