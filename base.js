@@ -34,6 +34,8 @@ function Chomper(genomesize) {
     this.step = 0;
     this.size = 6;
     this.food = 10000;
+    g.beginFill(pop[i].color, 1);
+    this.geom = g.drawRect(this.x, this.y, this.size, this.size);
     var genome = "";
     for(var base=0; base<genomesize; base++){
         genome = genome + randSel(["u", "d", "l", "r"]);
@@ -76,21 +78,25 @@ function Chomper(genomesize) {
     id++;
 }
 //Game Functions
-function preload() {
+// create an new instance of a pixi stage
+//var stage = new PIXI.Stage(0xFFFFFF);
+var paper = Raphael(10, 50, worldsize, worldsize);
+// create a renderer instance.
+//var renderer = PIXI.autoDetectRenderer(worldsize, worldsize, document.getElementById('game'));
 
-}
+// add the renderer view element to the DOM
+requestAnimFrame(update);
+var g = new PIXI.Graphics();
 function create(){
-    var graphics = game.add.graphics(0, 0);
     createPop();
     for(i=0; i<pop.length; i++){
         var x = pop[i].x;
         var y = pop[i].y;
         var size = pop[i].size;
-        graphics.beginFill(pop[i].color, 1);
-        sprite[i] = graphics.drawRect(x, y, size, size);
     }
 }
 function update(){
+    console.log("TEST");
     for(i=0; i<pop.length; i++){
         if(pop[i]){
             var step = pop[i].step;
@@ -107,4 +113,3 @@ function update(){
         }
     }
 }
-var game = new Phaser.Game(worldsize, worldsize, Phaser.AUTO, 'game', {create: create, update: update});
