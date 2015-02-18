@@ -2,7 +2,7 @@
 var popsize = 100;
 var worldsizex=window.screen.availWidth-200;
 var worldsizey=window.screen.availHeight-200;
-var initmaxmove = 100;
+var initmaxmove = 9;
 var pop = [];
 var sprite = [];
 id = 0;
@@ -29,12 +29,14 @@ function randColor() {
 }
 function Chomper(genomesize) {
     this.genomesize = genomesize;
+    this.id=id;
+    id+=1;
     this.size = 4;
     this.x = randNum(worldsizex-this.size);
     this.y = randNum(worldsizey-this.size);
     this.color = randColor();
     this.step = 0;
-    this.food = 10000;
+    this.food = 100;
     this.geom = paper.rect(this.x, this.y, this.size, this.size);
     var genome = "";
     for(var base=0; base<genomesize; base++){
@@ -42,44 +44,49 @@ function Chomper(genomesize) {
         genome = genome + String(randNum(initmaxmove));
         this.genome = genome;
     }
-    this.stepani = function(){
-        var letter = genome[this.step];
-        var dist = genome[this.step+1];
-        if(this.food-this.dist<=0){
-            console.log("Dead")
-            return 0;
+    var movement=0;
+    this.changePos = function(letter){
+        if(letter=="d" && this.y<worldsizey+this.size+2){
+            this.y+=1;
+        }
+        else if(letter=="u" && this.y>0){
+            this.y-=1;
+        }
+        else if(letter=="l" && this.x>0){
+            this.x-=1;
+        }
+        else if(letter=="r" && this.x<worldsizex+this.size+2){
+            this.x+=1;
+        }
+        this.geom = this.geom.attr({x: this.x, y: this.y});
+    }
+    var letter;
+    this.nextStep = function(){
+        if(this.movement>0){
+            if(this.food-1==0) {
+                return 0;
+            }
+            else {
+                this.changePos(letter);
+                this.geom.attr({x: this.x, y: this.y})
+                this.movement-=1;
+                this.food-=1;
+                return 1;
+            }
+
         }
         else{
-            if(letter=="u"){
-                this.y+=dist;
-            }
-            else if(letter=="d"){
-                this.y-=dist;
-            }
-            else if(letter=="l"){
-                this.y-=dist;
-            }
-            else if(letter=="r"){
-                this.y+=dist;
-            }
-            if(this.y<0){this.y=0}
-            if(this.x<0){this.x=0}
-            if(this.x+this.size>worldsizex){
-                this.x = worldsizex-this.size
-            }
-            if(this.y+this.size>worldsizey){
-                this.y = worldsizey-this.size
-            }
+            if(this.step>genomesize*2-2){this.step=0}
+            letter = genome[this.step];
+            var dist = genome[this.step+1];
             this.step+=2;
-            this.geom.animate({x: this.x, y: this.y}, this.dist*5);
+            this.movement = dist;
             return 1;
         }
     }
-    this.id = id;
-    id++;
 }
 var paper;
-var delay = 500;
+var delay = 100;
 var duration = 0;
 window.onload = function(){
     paper = Raphael(10, 50, worldsizex, worldsizey);
@@ -102,16 +109,17 @@ function create(){
 function update(){
     for(i=0; i<pop.length; i++){
         if(pop[i]){
-            var step = pop[i].stepani();
+            var step = pop[i].nextStep();
             if(step==1){
                 pop[i].geom.attr("fill", "#f00")
             }
             else{
                 console.log("Number "+String(i)+" has died");
+                pop[i].geom.hide();
                 delete pop[i]
             }
         }
     }
     duration+=1;
-    console.log(duration);
+    //console.log(duration);
 }
